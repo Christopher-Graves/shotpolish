@@ -14,13 +14,13 @@ const state = {
   bgType: 'gradient',
 
   // Gradient
-  gradientPreset: 0,
-  gradFrom: '#6366f1',
-  gradTo: '#8b5cf6',
+  gradientPreset: 2,
+  gradFrom: '#06b6d4',
+  gradTo: '#3b82f6',
   gradAngle: 135,
 
   // Solid
-  solidColor: '#1a1a2e',
+  solidColor: '#0f172a',
   solidPreset: -1,
 
   // Mesh
@@ -110,7 +110,7 @@ function init() {
 function buildGradientGrid() {
   GRADIENTS.forEach((g, i) => {
     const el = document.createElement('button');
-    el.className = 'gradient-swatch' + (i === 0 ? ' active' : '');
+    el.className = 'gradient-swatch' + (i === state.gradientPreset ? ' active' : '');
     el.style.background = g.css;
     el.title = g.name;
     el.addEventListener('click', () => {
@@ -422,13 +422,16 @@ function drawFullCanvas(canvas, scale = 1) {
     const alpha = state.shadowOpacity / 100;
     ctx.save();
     ctx.shadowColor = `rgba(0,0,0,${alpha})`;
-    ctx.shadowBlur  = state.shadowBlur * scale;
+    // shadowBlur is NOT affected by ctx.scale(), so pass raw value.
+    // shadowOffsetY IS in transformed coordinate space, so no scale needed either.
+    ctx.shadowBlur    = state.shadowBlur;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = state.shadowY;
 
-    // Draw dummy rect for shadow, then clear it
+    // Draw a near-invisible rect so the shadow is cast; radius matches the image clip.
     ctx.fillStyle = 'rgba(0,0,0,0.001)';
-    drawRoundRect(ctx, x + frameMargins.left, y + frameMargins.top, imgW, imgH, state.radius * scale);
+    ctx.beginPath();
+    drawRoundRect(ctx, x + frameMargins.left, y + frameMargins.top, imgW, imgH, state.radius);
     ctx.fill();
     ctx.restore();
   }
