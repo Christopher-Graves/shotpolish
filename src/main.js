@@ -6,6 +6,8 @@
 import { GRADIENTS, SOLID_COLORS, MESH_GRADIENTS } from './presets.js';
 import { drawFrameUnder, drawFrameOver } from './frames.js';
 import { exportPNG } from './export.js';
+import { isPro, initLicense } from './license.js';
+import { showProModal, renderAccountWidget } from './pro.js';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -103,6 +105,26 @@ function init() {
   buildMeshGrid();
   bindEvents();
   updateShadowVisibility();
+
+  // Account widget
+  renderAccountWidget();
+  window.addEventListener('sp:license-changed', () => {
+    renderAccountWidget();
+    // Re-render canvas in case watermark status changed
+    render();
+  });
+
+  // Silent background license check
+  initLicense();
+
+  // Handle post-checkout success redirect
+  if (new URLSearchParams(window.location.search).get('activated') === '1') {
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => {
+      alert('🎉 Welcome to Shot Polish Pro! Your license has been activated.');
+      renderAccountWidget();
+    }, 300);
+  }
 }
 
 // ─── Presets Builders ─────────────────────────────────────────────────────────
@@ -217,8 +239,16 @@ function bindEvents() {
 
   // ── Background Tabs ──
   document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const tab = btn.dataset.tab;
+
+      // Gate: Mesh tab requires Pro
+      if (tab === 'mesh' && !isPro()) {
+        const activated = await showProModal('Mesh Backgrounds');
+        if (!activated) return;
+        renderAccountWidget();
+      }
+
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       btn.classList.add('active');
@@ -282,10 +312,19 @@ function bindEvents() {
 
   // ── Frame ──
   frameBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
+      const frame = btn.dataset.frame;
+
+      // Gate: device frames (browser, macbook, iphone) require Pro
+      if (frame !== 'none' && !isPro()) {
+        const activated = await showProModal('Device Frames');
+        if (!activated) return;
+        renderAccountWidget();
+      }
+
       frameBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      state.frame = btn.dataset.frame;
+      state.frame = frame;
       browserUrlBar.classList.toggle('hidden', state.frame !== 'browser');
       render();
     });
@@ -307,10 +346,19 @@ function bindEvents() {
 
   // ── Export Scale ──
   scaleBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
+      const scale = parseInt(btn.dataset.scale);
+
+      // Gate: 2× and 3× require Pro
+      if (scale > 1 && !isPro()) {
+        const activated = await showProModal(`${scale}× Export Scale`);
+        if (!activated) return;
+        renderAccountWidget();
+      }
+
       scaleBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      state.exportScale = parseInt(btn.dataset.scale);
+      state.exportScale = scale;
     });
   });
 

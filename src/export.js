@@ -2,6 +2,8 @@
  * Shot Polish — PNG Export
  */
 
+import { isPro } from './license.js';
+
 export function exportPNG(state, drawFn) {
   const scale = state.exportScale ?? 2;
   const exportCanvas = document.createElement('canvas');
@@ -9,8 +11,10 @@ export function exportPNG(state, drawFn) {
   // Draw main content
   drawFn(exportCanvas, scale);
 
-  // Add watermark after drawing (in logical coordinate space — ctx is already scaled)
-  addWatermark(exportCanvas, scale);
+  // Add watermark only for free users
+  if (!isPro()) {
+    addWatermark(exportCanvas, scale);
+  }
 
   exportCanvas.toBlob(blob => {
     const url  = URL.createObjectURL(blob);

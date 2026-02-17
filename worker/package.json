@@ -1,0 +1,15 @@
+{
+  "name": "shotpolish-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker — license validation + Stripe webhook for Shot Polish",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

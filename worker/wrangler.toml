@@ -1,0 +1,20 @@
+name            = "shotpolish-api"
+main            = "src/index.js"
+compatibility_date = "2024-01-01"
+workers_dev     = true
+
+[vars]
+STRIPE_PUBLISHABLE_KEY = "pk_test_placeholder"
+
+# Secrets — set via CLI (never commit):
+#   wrangler secret put STRIPE_SECRET_KEY
+#   wrangler secret put STRIPE_WEBHOOK_SECRET
+
+[[kv_namespaces]]
+binding = "LICENSES"
+id      = "placeholder_id"   # replace after: wrangler kv:namespace create LICENSES
+
+# ── Routes (set after you have a custom domain) ─────────────────────────────
+# [[routes]]
+# pattern = "shotpolish.com/api/*"
+# zone_name = "shotpolish.com"

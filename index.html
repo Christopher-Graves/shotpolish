@@ -39,6 +39,8 @@
         <span class="logo-name">ShotPolish</span>
       </a>
       <div class="nav-links">
+        <!-- Account widget — populated by pro.js -->
+        <div class="sp-account-widget" id="sp-account-widget"></div>
         <a href="#tool" class="btn btn-primary">Open Tool →</a>
       </div>
     </nav>
@@ -71,6 +73,112 @@
     </div>
   </section>
 
+  <!-- ─── PRICING ───────────────────────────────────────────────── -->
+  <section class="pricing-section" id="pricing">
+    <div class="pricing-inner">
+      <div class="pricing-header">
+        <h2 class="pricing-title">Simple Pricing</h2>
+        <p class="pricing-sub">Start free. Upgrade when you need more.</p>
+      </div>
+
+      <div class="pricing-cards">
+
+        <!-- Free Tier -->
+        <div class="pricing-card">
+          <div class="pricing-card-header">
+            <div class="pricing-tier-name">Free</div>
+            <div class="pricing-price">
+              <span class="pricing-amount">$0</span>
+              <span class="pricing-period">forever</span>
+            </div>
+            <p class="pricing-desc">Everything you need to get started.</p>
+          </div>
+          <ul class="pricing-features">
+            <li class="feature-item">
+              <span class="feature-check">✓</span>
+              Gradient backgrounds (16 presets)
+            </li>
+            <li class="feature-item">
+              <span class="feature-check">✓</span>
+              Solid color backgrounds (20 presets)
+            </li>
+            <li class="feature-item">
+              <span class="feature-check">✓</span>
+              Padding &amp; corner radius
+            </li>
+            <li class="feature-item">
+              <span class="feature-check">✓</span>
+              Drop shadow controls
+            </li>
+            <li class="feature-item">
+              <span class="feature-check">✓</span>
+              All canvas ratios
+            </li>
+            <li class="feature-item">
+              <span class="feature-check">✓</span>
+              1× PNG export
+            </li>
+            <li class="feature-item feature-muted">
+              <span class="feature-dash">—</span>
+              Watermark on exports
+            </li>
+          </ul>
+          <a href="#tool" class="btn btn-free-cta">Start Free →</a>
+        </div>
+
+        <!-- Pro Tier -->
+        <div class="pricing-card pricing-card-pro">
+          <div class="pricing-pro-glow"></div>
+          <div class="pricing-card-header">
+            <div class="pricing-tier-name">
+              Pro
+              <span class="pricing-pro-badge">MOST POPULAR</span>
+            </div>
+            <div class="pricing-price">
+              <span class="pricing-amount">$8</span>
+              <span class="pricing-period">/month</span>
+            </div>
+            <div class="pricing-price-alt">or <strong>$49</strong> lifetime — pay once, own forever</div>
+            <p class="pricing-desc">For power users and indie creators.</p>
+          </div>
+          <ul class="pricing-features">
+            <li class="feature-item">
+              <span class="feature-check">✓</span>
+              Everything in Free
+            </li>
+            <li class="feature-item">
+              <span class="feature-check feature-pro-check">✓</span>
+              <strong>No watermark</strong> on exports
+            </li>
+            <li class="feature-item">
+              <span class="feature-check feature-pro-check">✓</span>
+              <strong>2× and 3×</strong> export scale
+            </li>
+            <li class="feature-item">
+              <span class="feature-check feature-pro-check">✓</span>
+              <strong>All device frames</strong> — Browser, MacBook, iPhone
+            </li>
+            <li class="feature-item">
+              <span class="feature-check feature-pro-check">✓</span>
+              <strong>Mesh / blob</strong> backgrounds
+            </li>
+            <li class="feature-item feature-coming-soon">
+              <span class="feature-check feature-pro-check">✓</span>
+              Batch processing <span class="soon-badge">soon</span>
+            </li>
+            <li class="feature-item feature-coming-soon">
+              <span class="feature-check feature-pro-check">✓</span>
+              App store template sizes <span class="soon-badge">soon</span>
+            </li>
+          </ul>
+          <button class="btn btn-pro-cta" id="pricing-upgrade-btn">✦ Upgrade to Pro</button>
+          <p class="pricing-guarantee">License key delivered instantly · Lifetime = no renewal</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- ─── TOOL ──────────────────────────────────────────────────── -->
   <section id="tool" class="tool-section">
     <div class="tool-layout">
@@ -100,7 +208,7 @@
           <div class="bg-type-tabs">
             <button class="tab-btn active" data-tab="gradient">Gradient</button>
             <button class="tab-btn" data-tab="solid">Solid</button>
-            <button class="tab-btn" data-tab="mesh">Mesh</button>
+            <button class="tab-btn" data-tab="mesh">Mesh <span class="pro-badge">PRO</span></button>
             <button class="tab-btn" data-tab="transparent">None</button>
           </div>
 
@@ -200,14 +308,17 @@
             <button class="frame-btn" data-frame="browser">
               <span class="frame-icon">🌐</span>
               <span>Browser</span>
+              <span class="pro-badge">PRO</span>
             </button>
             <button class="frame-btn" data-frame="macbook">
               <span class="frame-icon">💻</span>
               <span>MacBook</span>
+              <span class="pro-badge">PRO</span>
             </button>
             <button class="frame-btn" data-frame="iphone">
               <span class="frame-icon">📱</span>
               <span>iPhone</span>
+              <span class="pro-badge">PRO</span>
             </button>
           </div>
           <!-- Browser URL bar -->
@@ -235,8 +346,8 @@
             <label class="small-label">Scale</label>
             <div class="scale-btns">
               <button class="scale-btn" data-scale="1">1×</button>
-              <button class="scale-btn active" data-scale="2">2×</button>
-              <button class="scale-btn" data-scale="3">3×</button>
+              <button class="scale-btn active" data-scale="2">2× <span class="pro-badge">PRO</span></button>
+              <button class="scale-btn" data-scale="3">3× <span class="pro-badge">PRO</span></button>
             </div>
           </div>
           <button class="btn btn-export" id="exportBtn" disabled>
@@ -273,10 +384,23 @@
         <span class="logo-mark"></span>
         <span class="logo-name">ShotPolish</span>
       </span>
+      <div class="footer-links">
+        <a href="#pricing">Pricing</a>
+      </div>
       <span class="footer-copy">Your images never leave your browser.</span>
     </div>
   </footer>
 
   <script type="module" src="/src/main.js"></script>
+
+  <!-- Wire pricing upgrade button after modules load -->
+  <script type="module">
+    import { showProModal } from '/src/pro.js';
+    import { renderAccountWidget } from '/src/pro.js';
+    document.getElementById('pricing-upgrade-btn')?.addEventListener('click', async () => {
+      const activated = await showProModal('Shot Polish Pro');
+      if (activated) renderAccountWidget();
+    });
+  </script>
 </body>
 </html>
