@@ -4,7 +4,7 @@
  */
 
 import { GRADIENTS, SOLID_COLORS, MESH_GRADIENTS } from './presets.js';
-import { drawFrame } from './frames.js';
+import { drawFrameUnder, drawFrameOver } from './frames.js';
 import { exportPNG } from './export.js';
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -421,19 +421,24 @@ function drawFullCanvas(canvas, scale = 1) {
   if (state.shadowEnabled) {
     const alpha = state.shadowOpacity / 100;
     ctx.save();
-    ctx.shadowColor = `rgba(0,0,0,${alpha})`;
-    // shadowBlur is NOT affected by ctx.scale(), so pass raw value.
-    // shadowOffsetY IS in transformed coordinate space, so no scale needed either.
+    ctx.shadowColor   = `rgba(0,0,0,${alpha})`;
     ctx.shadowBlur    = state.shadowBlur;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = state.shadowY;
 
-    // Draw a near-invisible rect so the shadow is cast; radius matches the image clip.
-    ctx.fillStyle = 'rgba(0,0,0,0.001)';
+    // Use a solid black rect so the shadow is actually visible.
+    // The image drawn on top will cover this rect.
+    ctx.fillStyle = 'rgba(0,0,0,1)';
     ctx.beginPath();
     drawRoundRect(ctx, x + frameMargins.left, y + frameMargins.top, imgW, imgH, state.radius);
     ctx.fill();
     ctx.restore();
+  }
+
+  // ── Device Frame body (under image) ──
+  // Macbook and iPhone bezels are drawn FIRST so the image covers the screen area.
+  if (state.frame !== 'none') {
+    drawFrameUnder(ctx, state.frame, x, y, contentW, contentH, imgW, imgH, frameMargins, state, scale);
   }
 
   // ── Image with rounded corners ──
@@ -445,9 +450,10 @@ function drawFullCanvas(canvas, scale = 1) {
   ctx.drawImage(state.image, x + frameMargins.left, y + frameMargins.top, imgW, imgH);
   ctx.restore();
 
-  // ── Device Frame ──
+  // ── Device Frame overlays (over image) ──
+  // Browser title bar, camera notch, dynamic island, home bar, screen glow, etc.
   if (state.frame !== 'none') {
-    drawFrame(ctx, state.frame, x, y, contentW, contentH, imgW, imgH, frameMargins, state, scale);
+    drawFrameOver(ctx, state.frame, x, y, contentW, contentH, imgW, imgH, frameMargins, state, scale);
   }
 }
 

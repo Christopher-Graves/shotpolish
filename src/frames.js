@@ -1,14 +1,35 @@
 /**
  * Shot Polish — Device Frame Renderers
  * Each frame is drawn with canvas 2D API (no external images needed)
+ *
+ * Frames are split into two phases:
+ *  drawFrameUnder — body fills drawn BEFORE the screenshot image
+ *  drawFrameOver  — decorative overlays drawn AFTER the screenshot image
+ *
+ * This ensures macbook/iphone bezels don't cover the screenshot.
  */
 
-export function drawFrame(ctx, frameType, x, y, contentW, contentH, imgW, imgH, margins, state, scale = 1) {
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+export function drawFrameUnder(ctx, frameType, x, y, contentW, contentH, imgW, imgH, margins, state, scale = 1) {
+  switch (frameType) {
+    case 'macbook': drawMacbookFrameUnder(ctx, x, y, contentW, contentH, imgW, imgH); break;
+    case 'iphone':  drawIphoneFrameUnder(ctx, x, y, contentW, contentH, imgW, imgH); break;
+    // browser: title bar is above image, not under it — nothing to draw under
+  }
+}
+
+export function drawFrameOver(ctx, frameType, x, y, contentW, contentH, imgW, imgH, margins, state, scale = 1) {
   switch (frameType) {
     case 'browser': drawBrowserFrame(ctx, x, y, contentW, contentH, imgW, imgH, state); break;
-    case 'macbook': drawMacbookFrame(ctx, x, y, contentW, contentH, imgW, imgH); break;
-    case 'iphone':  drawIphoneFrame(ctx, x, y, contentW, contentH, imgW, imgH); break;
+    case 'macbook': drawMacbookFrameOver(ctx, x, y, contentW, contentH, imgW, imgH); break;
+    case 'iphone':  drawIphoneFrameOver(ctx, x, y, contentW, contentH, imgW, imgH); break;
   }
+}
+
+// Keep legacy export so nothing else breaks if imported elsewhere
+export function drawFrame(ctx, frameType, x, y, contentW, contentH, imgW, imgH, margins, state, scale = 1) {
+  drawFrameOver(ctx, frameType, x, y, contentW, contentH, imgW, imgH, margins, state, scale);
 }
 
 // ─── Browser Window Frame ─────────────────────────────────────────────────────
@@ -80,71 +101,27 @@ function drawBrowserFrame(ctx, x, y, contentW, contentH, imgW, imgH, state) {
   ctx.restore();
 }
 
-// ─── MacBook Frame ────────────────────────────────────────────────────────────
+// ─── MacBook Frame — Under (body, bezel, base) ────────────────────────────────
 
-function drawMacbookFrame(ctx, x, y, contentW, contentH, imgW, imgH) {
+function drawMacbookFrameUnder(ctx, x, y, contentW, contentH, imgW, imgH) {
   const margins = { top: 36, right: 24, bottom: 54, left: 24 };
   const outerR  = 14;
-  const screenR = 4;
 
-  // Laptop body
+  // Screen bezel body
   ctx.save();
-
-  // Screen bezel
   ctx.beginPath();
   roundRect(ctx, x, y, contentW, contentH - margins.bottom, outerR);
-
-  // Silver gradient fill
   const bodyGrad = ctx.createLinearGradient(x, y, x, y + contentH);
   bodyGrad.addColorStop(0, '#2a2a2a');
   bodyGrad.addColorStop(1, '#1a1a1a');
   ctx.fillStyle = bodyGrad;
   ctx.fill();
-
-  // Screen bezel border
   ctx.strokeStyle = '#3a3a3a';
   ctx.lineWidth = 1;
   ctx.stroke();
-
-  // Camera notch area at top (thin strip)
-  const notchW = 10;
-  const notchH = 10;
-  const notchX = x + contentW / 2 - notchW / 2;
-  const notchY = y + 12;
-  ctx.beginPath();
-  ctx.arc(notchX + notchW / 2, notchY + notchH / 2, 4, 0, Math.PI * 2);
-  ctx.fillStyle = '#111';
-  ctx.fill();
-
-  // Camera dot
-  ctx.beginPath();
-  ctx.arc(notchX + notchW / 2, notchY + notchH / 2, 2, 0, Math.PI * 2);
-  ctx.fillStyle = '#2a2a2a';
-  ctx.fill();
-
-  // Screen area (clip the screenshot — already drawn before frame)
-  // Just need the screen glow/sheen
-  const screenX = x + margins.left;
-  const screenY = y + margins.top;
-  const screenW = contentW - margins.left - margins.right;
-  const screenH = contentH - margins.top - margins.bottom;
-
-  ctx.beginPath();
-  roundRect(ctx, screenX, screenY, screenW, screenH, screenR);
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  // Screen glare overlay
-  const glare = ctx.createLinearGradient(screenX, screenY, screenX + screenW, screenY + screenH * 0.4);
-  glare.addColorStop(0, 'rgba(255,255,255,0.03)');
-  glare.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = glare;
-  ctx.fill();
-
   ctx.restore();
 
-  // ── Base / keyboard ──
+  // Base / keyboard
   const baseX = x - 10;
   const baseY = y + contentH - margins.bottom;
   const baseW = contentW + 20;
@@ -186,9 +163,55 @@ function drawMacbookFrame(ctx, x, y, contentW, contentH, imgW, imgH) {
   ctx.restore();
 }
 
-// ─── iPhone Frame ─────────────────────────────────────────────────────────────
+// ─── MacBook Frame — Over (camera, screen glow) ───────────────────────────────
 
-function drawIphoneFrame(ctx, x, y, contentW, contentH, imgW, imgH) {
+function drawMacbookFrameOver(ctx, x, y, contentW, contentH, imgW, imgH) {
+  const margins = { top: 36, right: 24, bottom: 54, left: 24 };
+  const screenR = 4;
+
+  ctx.save();
+
+  // Camera notch
+  const notchW = 10;
+  const notchH = 10;
+  const notchX = x + contentW / 2 - notchW / 2;
+  const notchY = y + 12;
+  ctx.beginPath();
+  ctx.arc(notchX + notchW / 2, notchY + notchH / 2, 4, 0, Math.PI * 2);
+  ctx.fillStyle = '#111';
+  ctx.fill();
+
+  // Camera dot
+  ctx.beginPath();
+  ctx.arc(notchX + notchW / 2, notchY + notchH / 2, 2, 0, Math.PI * 2);
+  ctx.fillStyle = '#2a2a2a';
+  ctx.fill();
+
+  // Screen border glow
+  const screenX = x + margins.left;
+  const screenY = y + margins.top;
+  const screenW = contentW - margins.left - margins.right;
+  const screenH = contentH - margins.top - margins.bottom;
+
+  ctx.beginPath();
+  roundRect(ctx, screenX, screenY, screenW, screenH, screenR);
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Screen glare overlay
+  const glare = ctx.createLinearGradient(screenX, screenY, screenX + screenW, screenY + screenH * 0.4);
+  glare.addColorStop(0, 'rgba(255,255,255,0.03)');
+  glare.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = glare;
+  ctx.fill();
+
+  ctx.restore();
+}
+
+// ─── iPhone Frame — Under (phone body only) ───────────────────────────────────
+
+function drawIphoneFrameUnder(ctx, x, y, contentW, contentH, imgW, imgH) {
   const r = Math.min(36, contentW * 0.1);
 
   ctx.save();
@@ -196,17 +219,23 @@ function drawIphoneFrame(ctx, x, y, contentW, contentH, imgW, imgH) {
   // Phone body
   ctx.beginPath();
   roundRect(ctx, x, y, contentW, contentH, r);
-
   const bodyGrad = ctx.createLinearGradient(x, y, x + contentW, y + contentH);
   bodyGrad.addColorStop(0, '#2a2a2e');
   bodyGrad.addColorStop(0.5, '#1e1e24');
   bodyGrad.addColorStop(1, '#2a2a2e');
   ctx.fillStyle = bodyGrad;
   ctx.fill();
-
   ctx.strokeStyle = '#3d3d50';
   ctx.lineWidth = 2;
   ctx.stroke();
+
+  ctx.restore();
+}
+
+// ─── iPhone Frame — Over (dynamic island, buttons, home bar, screen glow) ─────
+
+function drawIphoneFrameOver(ctx, x, y, contentW, contentH, imgW, imgH) {
+  ctx.save();
 
   // Dynamic Island / notch
   const diW  = contentW * 0.28;
@@ -218,7 +247,7 @@ function drawIphoneFrame(ctx, x, y, contentW, contentH, imgW, imgH) {
   ctx.fillStyle = '#0a0a0a';
   ctx.fill();
 
-  // Side buttons (right side)
+  // Side buttons (right side) — Bug 4 fix: use local roundRect() not ctx.roundRect()
   const btnX = x + contentW - 2;
   const btnConfigs = [
     { by: y + contentH * 0.28, bh: 50 },
@@ -226,7 +255,7 @@ function drawIphoneFrame(ctx, x, y, contentW, contentH, imgW, imgH) {
   ];
   btnConfigs.forEach(({ by, bh }) => {
     ctx.beginPath();
-    ctx.roundRect(btnX, by, 4, bh, 2);
+    roundRect(ctx, btnX, by, 4, bh, 2);
     ctx.fillStyle = '#1a1a1e';
     ctx.fill();
     ctx.strokeStyle = '#3d3d50';
@@ -234,10 +263,10 @@ function drawIphoneFrame(ctx, x, y, contentW, contentH, imgW, imgH) {
     ctx.stroke();
   });
 
-  // Left button (power/lock)
+  // Left button (power/lock) — Bug 4 fix: use local roundRect() not ctx.roundRect()
   const pwrX = x - 2;
   ctx.beginPath();
-  ctx.roundRect(pwrX, y + contentH * 0.32, 4, 60, 2);
+  roundRect(ctx, pwrX, y + contentH * 0.32, 4, 60, 2);
   ctx.fillStyle = '#1a1a1e';
   ctx.fill();
   ctx.strokeStyle = '#3d3d50';
