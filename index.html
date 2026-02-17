@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- SEO Meta Tags -->
+  <title>Shot Polish — Beautiful Screenshots in Seconds</title>
+  <meta name="description" content="Shot Polish is a free screenshot beautifier that transforms plain screenshots into stunning visuals. Add gradients, frames, shadows, and more. Perfect for app store screenshots, social media, and presentations." />
+  <meta name="keywords" content="screenshot beautifier, screenshot cleaner, app store screenshots, screenshot background, screenshot editor, beautify screenshot, screenshot tool, screenshot framer" />
+  <meta name="author" content="Shot Polish" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://shotpolish.app" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Shot Polish — Beautiful Screenshots in Seconds" />
+  <meta property="og:description" content="Transform plain screenshots into stunning visuals. Add gradients, frames, shadows, and more — free, no signup required." />
+  <meta property="og:url" content="https://shotpolish.app" />
+  <meta property="og:image" content="/og-image.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Shot Polish — Beautiful Screenshots in Seconds" />
+  <meta name="twitter:description" content="Transform plain screenshots into stunning visuals. Free, no signup required." />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+
+  <!-- ─── HEADER ─────────────────────────────────────────────────── -->
+  <header class="site-header">
+    <nav class="nav">
+      <a href="#" class="logo">
+        <span class="logo-icon">✦</span>
+        Shot<span class="logo-accent">Polish</span>
+      </a>
+      <div class="nav-links">
+        <a href="#tool" class="btn btn-primary">Try Free →</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ─── HERO ──────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-badge">✦ Free · No signup · Runs in your browser</div>
+    <h1 class="hero-title">
+      Make your screenshots<br />
+      <span class="hero-gradient-text">look gorgeous</span>
+    </h1>
+    <p class="hero-subtitle">
+      Add beautiful backgrounds, drop shadows, device frames, and rounded corners
+      to any screenshot — in seconds. Perfect for app store previews, social media,
+      and presentations.
+    </p>
+    <div class="hero-cta">
+      <a href="#tool" class="btn btn-hero">Beautify a Screenshot →</a>
+      <span class="hero-cta-note">No account needed. 100% client-side.</span>
+    </div>
+
+    <!-- Feature pills -->
+    <div class="feature-pills">
+      <span class="pill">🎨 Gradient Backgrounds</span>
+      <span class="pill">🖥️ Device Frames</span>
+      <span class="pill">💫 Drop Shadows</span>
+      <span class="pill">📐 Custom Padding</span>
+      <span class="pill">↗️ Export PNG</span>
+      <span class="pill">📋 Paste from Clipboard</span>
+    </div>
+  </section>
+
+  <!-- ─── TOOL ──────────────────────────────────────────────────── -->
+  <section id="tool" class="tool-section">
+    <div class="tool-layout">
+
+      <!-- ── LEFT PANEL: Controls ── -->
+      <aside class="controls-panel" id="controlsPanel">
+        <div class="panel-header">
+          <h2 class="panel-title">Controls</h2>
+        </div>
+
+        <!-- Upload -->
+        <div class="control-group">
+          <label class="control-label">Screenshot</label>
+          <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">⬆</div>
+            <div class="upload-text">Drop image here</div>
+            <div class="upload-sub">or</div>
+            <button class="btn btn-upload" id="uploadBtn">Choose File</button>
+            <div class="upload-sub">or paste from clipboard (Ctrl+V)</div>
+            <input type="file" id="fileInput" accept="image/*" hidden />
+          </div>
+        </div>
+
+        <!-- Background -->
+        <div class="control-group" id="bgGroup">
+          <label class="control-label">Background</label>
+          <div class="bg-type-tabs">
+            <button class="tab-btn active" data-tab="gradient">Gradient</button>
+            <button class="tab-btn" data-tab="solid">Solid</button>
+            <button class="tab-btn" data-tab="mesh">Mesh</button>
+            <button class="tab-btn" data-tab="transparent">None</button>
+          </div>
+
+          <!-- Gradient Presets -->
+          <div class="tab-content active" id="tab-gradient">
+            <div class="gradient-grid" id="gradientGrid"></div>
+            <div class="custom-gradient">
+              <label class="small-label">Custom</label>
+              <div class="color-row">
+                <label class="small-label">From</label>
+                <input type="color" class="color-swatch" id="gradFrom" value="#6366f1" />
+                <label class="small-label">To</label>
+                <input type="color" class="color-swatch" id="gradTo" value="#8b5cf6" />
+              </div>
+              <div class="color-row">
+                <label class="small-label">Angle</label>
+                <input type="range" class="slider" id="gradAngle" min="0" max="360" value="135" />
+                <span class="slider-val" id="gradAngleVal">135°</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Solid Color -->
+          <div class="tab-content" id="tab-solid">
+            <div class="solid-presets" id="solidPresets"></div>
+            <div class="color-row">
+              <label class="small-label">Custom Color</label>
+              <input type="color" class="color-swatch" id="solidColor" value="#1a1a2e" />
+            </div>
+          </div>
+
+          <!-- Mesh/Noise -->
+          <div class="tab-content" id="tab-mesh">
+            <div class="gradient-grid" id="meshGrid"></div>
+          </div>
+
+          <!-- Transparent -->
+          <div class="tab-content" id="tab-transparent">
+            <p class="muted-text">No background — transparent canvas (PNG only)</p>
+          </div>
+        </div>
+
+        <!-- Padding -->
+        <div class="control-group" id="paddingGroup">
+          <label class="control-label">Padding</label>
+          <div class="slider-row">
+            <input type="range" class="slider" id="paddingSlider" min="0" max="200" value="60" />
+            <span class="slider-val" id="paddingVal">60px</span>
+          </div>
+        </div>
+
+        <!-- Border Radius -->
+        <div class="control-group" id="radiusGroup">
+          <label class="control-label">Corner Radius</label>
+          <div class="slider-row">
+            <input type="range" class="slider" id="radiusSlider" min="0" max="40" value="12" />
+            <span class="slider-val" id="radiusVal">12px</span>
+          </div>
+        </div>
+
+        <!-- Drop Shadow -->
+        <div class="control-group" id="shadowGroup">
+          <label class="control-label">
+            Drop Shadow
+            <label class="toggle-switch">
+              <input type="checkbox" id="shadowToggle" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </label>
+          <div id="shadowControls">
+            <div class="slider-row">
+              <label class="small-label">Blur</label>
+              <input type="range" class="slider" id="shadowBlur" min="0" max="100" value="40" />
+              <span class="slider-val" id="shadowBlurVal">40</span>
+            </div>
+            <div class="slider-row">
+              <label class="small-label">Offset Y</label>
+              <input type="range" class="slider" id="shadowY" min="0" max="60" value="16" />
+              <span class="slider-val" id="shadowYVal">16</span>
+            </div>
+            <div class="slider-row">
+              <label class="small-label">Opacity</label>
+              <input type="range" class="slider" id="shadowOpacity" min="0" max="100" value="40" />
+              <span class="slider-val" id="shadowOpacityVal">40%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Device Frame -->
+        <div class="control-group" id="frameGroup">
+          <label class="control-label">Device Frame</label>
+          <div class="frame-grid">
+            <button class="frame-btn active" data-frame="none">
+              <span class="frame-icon">🚫</span>
+              <span>None</span>
+            </button>
+            <button class="frame-btn" data-frame="browser">
+              <span class="frame-icon">🌐</span>
+              <span>Browser</span>
+            </button>
+            <button class="frame-btn" data-frame="macbook">
+              <span class="frame-icon">💻</span>
+              <span>MacBook</span>
+            </button>
+            <button class="frame-btn" data-frame="iphone">
+              <span class="frame-icon">📱</span>
+              <span>iPhone</span>
+            </button>
+          </div>
+          <!-- Browser URL bar -->
+          <div id="browserUrlBar" class="hidden">
+            <input type="text" class="url-input" id="browserUrl" placeholder="https://yoursite.com" value="https://example.com" />
+          </div>
+        </div>
+
+        <!-- Canvas Size -->
+        <div class="control-group">
+          <label class="control-label">Canvas Ratio</label>
+          <div class="ratio-grid">
+            <button class="ratio-btn active" data-ratio="auto">Auto</button>
+            <button class="ratio-btn" data-ratio="1:1">1:1</button>
+            <button class="ratio-btn" data-ratio="16:9">16:9</button>
+            <button class="ratio-btn" data-ratio="4:3">4:3</button>
+            <button class="ratio-btn" data-ratio="3:2">3:2</button>
+          </div>
+        </div>
+
+        <!-- Export -->
+        <div class="control-group export-group">
+          <label class="control-label">Export</label>
+          <div class="export-scale-row">
+            <label class="small-label">Scale</label>
+            <div class="scale-btns">
+              <button class="scale-btn" data-scale="1">1×</button>
+              <button class="scale-btn active" data-scale="2">2×</button>
+              <button class="scale-btn" data-scale="3">3×</button>
+            </div>
+          </div>
+          <button class="btn btn-export" id="exportBtn" disabled>
+            ↓ Export PNG
+          </button>
+        </div>
+
+      </aside>
+
+      <!-- ── CENTER: Preview Canvas ── -->
+      <main class="preview-area">
+        <div class="preview-wrapper" id="previewWrapper">
+          <!-- Empty state -->
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon">📸</div>
+            <h3>Drop a screenshot here</h3>
+            <p>Or paste from clipboard with Ctrl+V</p>
+            <button class="btn btn-primary" id="emptyUploadBtn">Choose File</button>
+          </div>
+
+          <!-- Canvas (hidden until image loaded) -->
+          <canvas id="outputCanvas" class="hidden"></canvas>
+        </div>
+        <div class="preview-label" id="previewLabel"></div>
+      </main>
+
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="logo">✦ Shot<span class="logo-accent">Polish</span></span>
+      <span class="footer-copy">Free, open, client-side. Your images never leave your browser.</span>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

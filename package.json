@@ -1,0 +1,16 @@
+{
+  "name": "shotpolish",
+  "private": true,
+  "version": "1.0.0",
+  "description": "A free, client-side screenshot beautifier. Add backgrounds, frames, shadows, and more.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": ["screenshot", "beautifier", "screenshot-editor", "app-store-screenshots"],
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}
