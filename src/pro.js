@@ -8,9 +8,9 @@
 
 import { validateLicense, isPro, clearLicense, getLicenseKey } from './license.js';
 
-// Stripe Price IDs — replace with real ones from your Stripe Dashboard
-const PRICE_MONTHLY  = 'price_monthly_placeholder';
-const PRICE_LIFETIME = 'price_lifetime_placeholder';
+// Stripe Price IDs — set via env vars VITE_STRIPE_PRICE_MONTHLY and VITE_STRIPE_PRICE_LIFETIME
+const PRICE_MONTHLY  = __STRIPE_PRICE_MONTHLY__  || '';
+const PRICE_LIFETIME = __STRIPE_PRICE_LIFETIME__ || '';
 
 function apiBase() {
   if (typeof window !== 'undefined' && window.SHOTPOLISH_API_URL) {
