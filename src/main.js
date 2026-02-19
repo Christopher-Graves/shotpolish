@@ -87,6 +87,19 @@ function showSuccessToast() {
   setTimeout(() => keyInput.focus(), 100);
 }
 
+// ─── Pro UI Updates ───────────────────────────────────────────────────────────
+
+function updateProUI() {
+  const pricingSection = document.getElementById('pricing');
+  if (pricingSection) {
+    pricingSection.style.display = isPro() ? 'none' : '';
+  }
+  // Update any Pro badge indicators in sidebar
+  document.querySelectorAll('.pro-badge').forEach(el => {
+    el.style.display = isPro() ? 'none' : '';
+  });
+}
+
 // ─── State ────────────────────────────────────────────────────────────────────
 
 const state = {
@@ -184,10 +197,12 @@ function init() {
   bindEvents();
   updateShadowVisibility();
 
-  // Account widget
+  // Account widget + Pro state
   renderAccountWidget();
+  updateProUI();
   window.addEventListener('sp:license-changed', () => {
     renderAccountWidget();
+    updateProUI();
     // Re-render canvas in case watermark status changed
     render();
   });
