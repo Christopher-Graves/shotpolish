@@ -172,7 +172,8 @@ async function handleWebhook(request, env) {
     const body = await request.text();
     const sig  = request.headers.get('stripe-signature');
 
-    const valid = await verifyStripeSignature(body, sig, env.STRIPE_WEBHOOK_SECRET);
+    const webhookSecret = env.STRIPE_TEST_WEBHOOK_SECRET || env.STRIPE_WEBHOOK_SECRET;
+    const valid = await verifyStripeSignature(body, sig, webhookSecret);
     if (!valid) return json({ error: 'Invalid signature' }, 400);
 
     const event = JSON.parse(body);
