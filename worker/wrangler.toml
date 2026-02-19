@@ -2,17 +2,20 @@ name            = "shotpolish-api"
 main            = "src/index.js"
 compatibility_date = "2024-01-01"
 workers_dev     = true
+account_id      = "bf5001ce6d286a5ede70af9eddbd79d9"
 
 [vars]
 STRIPE_PUBLISHABLE_KEY = "pk_test_placeholder"
 
-# Secrets — set via CLI (never commit):
-#   wrangler secret put STRIPE_SECRET_KEY
-#   wrangler secret put STRIPE_WEBHOOK_SECRET
+# Secrets — set via Cloudflare dashboard (Environment Variables > Encrypted):
+#   STRIPE_TEST_SECRET_KEY    — Stripe test mode secret key
+#   STRIPE_PROD_SECRET_KEY    — Stripe prod mode secret key
+#   STRIPE_WEBHOOK_SECRET     — Stripe webhook signing secret
+#   RESEND_API_KEY            — Resend.com API key for license emails
 
 [[kv_namespaces]]
 binding = "LICENSES"
-id      = "placeholder_id"   # replace after: wrangler kv:namespace create LICENSES
+id      = "818b6ef7fa174c12a0e80f86ea4f83b6"
 
 # ── Routes (set after you have a custom domain) ─────────────────────────────
 # [[routes]]

@@ -4,7 +4,7 @@ export default defineConfig({
   base: '/',
   define: {
     '__STRIPE_PRICE_MONTHLY__': JSON.stringify(process.env.VITE_STRIPE_PRICE_MONTHLY || ''),
-    '__STRIPE_PRICE_LIFETIME__': JSON.stringify(process.env.VITE_STRIPE_PRICE_LIFETIME || ''),
+    '__STRIPE_PRICE_LIFETIME__': JSON.stringify(process.env.VITE_STRIPE_PRICE_LIFETIME || 'price_1T2dv7HuWwXaIH3FEdcHsptN'),
   },
   build: {
     outDir: 'dist',

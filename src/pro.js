@@ -60,20 +60,17 @@ function renderModal(featureName) {
       <div class="sp-modal-header">
         <div class="sp-pro-badge-large">PRO</div>
         <h2 class="sp-modal-title" id="sp-modal-title">${featureName} is a Pro feature</h2>
-        <p class="sp-modal-sub">Unlock all Pro features for $8/month or $49 lifetime.</p>
+        <p class="sp-modal-sub">Unlock all Pro features with a one-time $29 payment.</p>
       </div>
 
       <div class="sp-modal-body">
 
         <!-- Pricing options -->
         <div class="sp-pricing-row">
-          <button class="sp-upgrade-btn sp-upgrade-monthly" id="sp-upgrade-monthly">
-            <span class="sp-upgrade-label">Monthly</span>
-            <span class="sp-upgrade-price">$8<span class="sp-upgrade-period">/mo</span></span>
-          </button>
-          <button class="sp-upgrade-btn sp-upgrade-lifetime" id="sp-upgrade-lifetime">
-            <span class="sp-upgrade-label">Lifetime ✦</span>
-            <span class="sp-upgrade-price">$49</span>
+          <button class="sp-upgrade-btn sp-upgrade-lifetime" id="sp-upgrade-lifetime" style="width:100%;max-width:320px;">
+            <span class="sp-upgrade-label">Lifetime License ✦</span>
+            <span class="sp-upgrade-price">$29</span>
+            <span class="sp-upgrade-period" style="font-size:12px;opacity:0.7;">One-time payment · No renewal</span>
           </button>
         </div>
 
@@ -115,7 +112,6 @@ function renderModal(featureName) {
   overlay.addEventListener('click', e => { if (e.target === overlay) resolveModal(false); });
   document.addEventListener('keydown', onEscKey);
 
-  document.getElementById('sp-upgrade-monthly').addEventListener('click', () => startCheckout(PRICE_MONTHLY));
   document.getElementById('sp-upgrade-lifetime').addEventListener('click', () => startCheckout(PRICE_LIFETIME));
 
   const keyInput    = document.getElementById('sp-key-input');
@@ -177,9 +173,7 @@ function onEscKey(e) {
 
 async function startCheckout(priceId) {
   try {
-    const btn = priceId === PRICE_MONTHLY
-      ? document.getElementById('sp-upgrade-monthly')
-      : document.getElementById('sp-upgrade-lifetime');
+    const btn = document.getElementById('sp-upgrade-lifetime');
     if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
 
     const res = await fetch(`${apiBase()}/create-checkout`, {
@@ -197,7 +191,7 @@ async function startCheckout(priceId) {
       window.location.href = data.url;
     } else {
       alert(data.error || 'Could not start checkout. Please try again.');
-      if (btn) { btn.disabled = false; btn.textContent = priceId === PRICE_MONTHLY ? 'Monthly — $8/mo' : 'Lifetime — $49'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Lifetime License ✦ — $29'; }
     }
   } catch (err) {
     alert('Network error. Please try again.');
@@ -256,7 +250,7 @@ export function renderAccountWidget() {
           <span class="sp-account-value">Free</span>
         </div>
         <button class="sp-account-action sp-account-upgrade" id="sp-upgrade-nav-btn">
-          ✦ Upgrade to Pro — $49
+          ✦ Upgrade to Pro — $29
         </button>
       </div>
     `;

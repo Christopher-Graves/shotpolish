@@ -28,6 +28,43 @@ function json(data, status = 200) {
   });
 }
 
+// ─── License Email Template ────────────────────────────────────────────────────
+
+function buildLicenseEmail(licenseKey, email) {
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="max-width:520px;margin:0 auto;padding:40px 24px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <h1 style="color:#f8fafc;font-size:24px;margin:0;">🎉 Welcome to ShotPolish Pro!</h1>
+    </div>
+    <div style="background:#1e293b;border-radius:12px;padding:32px 24px;border:1px solid #334155;">
+      <p style="color:#94a3b8;font-size:14px;margin:0 0 8px;">Your license key:</p>
+      <div style="background:#0f172a;border-radius:8px;padding:16px;text-align:center;border:1px solid #475569;">
+        <code style="color:#38bdf8;font-size:20px;font-weight:700;letter-spacing:2px;">${licenseKey}</code>
+      </div>
+      <p style="color:#64748b;font-size:13px;margin:16px 0 0;text-align:center;">
+        Copy this key and paste it into ShotPolish to activate Pro features.
+      </p>
+    </div>
+    <div style="margin-top:24px;text-align:center;">
+      <a href="https://shotpolish.com" style="display:inline-block;background:linear-gradient(135deg,#8B5CF6,#EC4899);color:#fff;text-decoration:none;padding:12px 32px;border-radius:8px;font-weight:600;font-size:14px;">
+        Open ShotPolish →
+      </a>
+    </div>
+    <div style="margin-top:32px;text-align:center;">
+      <p style="color:#475569;font-size:12px;margin:0;">
+        This is a lifetime license — no renewal needed.<br>
+        Questions? Reply to this email.
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
 // ─── License Key Generator ─────────────────────────────────────────────────────
 // Format: SP-XXXX-XXXX-XXXX-XXXX (24 chars + prefix + dashes)
 
@@ -88,6 +125,11 @@ async function verifyStripeSignature(payload, signature, secret) {
 
 // ─── Route Handlers ────────────────────────────────────────────────────────────
 
+function getStripeKey(env) {
+  // Use test key by default; flip to prod when ready
+  return env.STRIPE_TEST_SECRET_KEY || env.STRIPE_PROD_SECRET_KEY;
+}
+
 async function handleCreateCheckout(request, env) {
   try {
     const { priceId, successUrl, cancelUrl } = await request.json();
@@ -108,7 +150,7 @@ async function handleCreateCheckout(request, env) {
     const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`,
+        'Authorization': `Bearer ${getStripeKey(env)}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: params,
@@ -155,8 +197,29 @@ async function handleWebhook(request, env) {
       // Store reverse lookup by email (latest key wins)
       await env.LICENSES.put(`email:${email}`, licenseKey);
 
-      // TODO: Send email with license key via email service (Mailgun, Resend, etc.)
-      console.log(`License issued: ${licenseKey} → ${email}`);
+      // Send license key via Resend
+      if (env.RESEND_API_KEY) {
+        try {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: 'ShotPolish <license@shotpolish.com>',
+              to: email,
+              subject: 'Your ShotPolish Pro License Key 🎉',
+              html: buildLicenseEmail(licenseKey, email),
+            }),
+          });
+          console.log(`License email sent: ${licenseKey} → ${email}`);
+        } catch (emailErr) {
+          console.error(`Failed to send license email: ${emailErr.message}`);
+        }
+      } else {
+        console.log(`License issued (no email configured): ${licenseKey} → ${email}`);
+      }
     }
 
     if (event.type === 'customer.subscription.deleted') {
