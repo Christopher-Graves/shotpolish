@@ -17,7 +17,11 @@ STRIPE_PUBLISHABLE_KEY = "pk_test_placeholder"
 binding = "LICENSES"
 id      = "818b6ef7fa174c12a0e80f86ea4f83b6"
 
-# ── Routes (set after you have a custom domain) ─────────────────────────────
-# [[routes]]
-# pattern = "shotpolish.com/api/*"
-# zone_name = "shotpolish.com"
+# ── Routes ───────────────────────────────────────────────────────────────────
+[[routes]]
+pattern = "shotpolish.com/api/*"
+zone_name = "shotpolish.com"
+
+[[routes]]
+pattern = "www.shotpolish.com/api/*"
+zone_name = "shotpolish.com"

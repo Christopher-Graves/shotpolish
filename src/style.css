@@ -1331,3 +1331,107 @@ a { color: inherit; text-decoration: none; }
     grid-template-columns: 1fr;
   }
 }
+
+/* ─── Success Toast ─────────────────────────────────────────── */
+.sp-toast-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: sp-fade-in 0.25s ease;
+}
+@keyframes sp-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sp-slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.sp-toast-card {
+  background: var(--surface, #1e293b);
+  border: 1px solid var(--border, #334155);
+  border-radius: 16px;
+  padding: 40px 32px 32px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  animation: sp-slide-up 0.3s ease;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+}
+.sp-toast-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+.sp-toast-title {
+  color: var(--text, #f8fafc);
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.sp-toast-text {
+  color: var(--text-muted, #94a3b8);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+.sp-toast-key-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.sp-toast-key-input {
+  flex: 1;
+  background: var(--bg, #0f172a);
+  border: 1px solid var(--border, #334155);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text, #f8fafc);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.sp-toast-key-input:focus {
+  border-color: var(--accent, #8B5CF6);
+}
+.sp-toast-key-input::placeholder {
+  color: var(--text-muted, #475569);
+  letter-spacing: 1px;
+}
+.sp-toast-activate-btn {
+  background: var(--accent, #8B5CF6);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.sp-toast-activate-btn:hover:not(:disabled) {
+  background: var(--accent-hover, #7c3aed);
+}
+.sp-toast-activate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.sp-toast-status {
+  font-size: 13px;
+  min-height: 20px;
+  margin-bottom: 8px;
+}
+.sp-toast-dismiss {
+  background: none;
+  border: none;
+  color: var(--text-muted, #64748b);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 8px 16px;
+  transition: color 0.2s;
+}
+.sp-toast-dismiss:hover {
+  color: var(--text, #f8fafc);
+}

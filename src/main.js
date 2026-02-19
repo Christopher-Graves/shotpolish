@@ -9,6 +9,84 @@ import { exportPNG } from './export.js';
 import { isPro, initLicense } from './license.js';
 import { showProModal, renderAccountWidget } from './pro.js';
 
+// ─── Toast Notification ───────────────────────────────────────────────────────
+
+function showSuccessToast() {
+  const existing = document.getElementById('sp-success-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'sp-success-toast';
+  toast.innerHTML = `
+    <div class="sp-toast-overlay">
+      <div class="sp-toast-card">
+        <div class="sp-toast-icon">🎉</div>
+        <h3 class="sp-toast-title">Thank you for your purchase!</h3>
+        <p class="sp-toast-text">
+          Your license key has been sent to your email.<br>
+          Check your inbox and enter it below to activate Pro.
+        </p>
+        <div class="sp-toast-key-form">
+          <input
+            type="text"
+            class="sp-toast-key-input"
+            id="sp-toast-key-input"
+            placeholder="SP-XXXX-XXXX-XXXX-XXXX"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="sp-toast-activate-btn" id="sp-toast-activate">Activate</button>
+        </div>
+        <div class="sp-toast-status" id="sp-toast-status"></div>
+        <button class="sp-toast-dismiss" id="sp-toast-dismiss">I'll do this later</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(toast);
+
+  // Format input
+  const keyInput = document.getElementById('sp-toast-key-input');
+  keyInput.addEventListener('input', () => {
+    let val = keyInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (val.startsWith('SP')) val = val.slice(2);
+    const chunks = [];
+    for (let i = 0; i < Math.min(val.length, 16); i += 4) {
+      chunks.push(val.slice(i, i + 4));
+    }
+    keyInput.value = chunks.length ? 'SP-' + chunks.join('-') : keyInput.value;
+  });
+
+  // Activate
+  document.getElementById('sp-toast-activate').addEventListener('click', async () => {
+    const key = keyInput.value.trim();
+    if (!key) return;
+    const btn = document.getElementById('sp-toast-activate');
+    const status = document.getElementById('sp-toast-status');
+    btn.disabled = true;
+    btn.textContent = 'Checking…';
+
+    const { validateLicense } = await import('./license.js');
+    const result = await validateLicense(key);
+
+    if (result.valid) {
+      status.textContent = '✓ Pro activated! Enjoy.';
+      status.style.color = '#22c55e';
+      window.dispatchEvent(new CustomEvent('sp:license-changed'));
+      renderAccountWidget();
+      setTimeout(() => toast.remove(), 1200);
+    } else {
+      status.textContent = result.error || 'Invalid key. Check your email and try again.';
+      status.style.color = '#f43f5e';
+      btn.disabled = false;
+      btn.textContent = 'Activate';
+    }
+  });
+
+  keyInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('sp-toast-activate').click(); });
+  document.getElementById('sp-toast-dismiss').addEventListener('click', () => toast.remove());
+  setTimeout(() => keyInput.focus(), 100);
+}
+
 // ─── State ────────────────────────────────────────────────────────────────────
 
 const state = {
@@ -121,8 +199,7 @@ function init() {
   if (new URLSearchParams(window.location.search).get('activated') === '1') {
     window.history.replaceState({}, '', window.location.pathname);
     setTimeout(() => {
-      alert('🎉 Welcome to Shot Polish Pro! Your license has been activated.');
-      renderAccountWidget();
+      showSuccessToast();
     }, 300);
   }
 }
