@@ -560,17 +560,24 @@ function drawFullCanvas(canvas, scale = 1) {
   // ── Drop Shadow ──
   if (state.shadowEnabled) {
     const alpha = state.shadowOpacity / 100;
+    // Shadow should wrap the whole device frame, not just the image
+    const shadowX = state.frame !== 'none' ? x : x + frameMargins.left;
+    const shadowY = state.frame !== 'none' ? y : y + frameMargins.top;
+    const shadowW = state.frame !== 'none' ? contentW : imgW;
+    const shadowH = state.frame !== 'none' ? contentH : imgH;
+    const shadowR = state.frame === 'none' ? state.radius
+      : state.frame === 'iphone' ? Math.min(36, contentW * 0.1)
+      : state.frame === 'macbook' ? 14
+      : 12; // browser
+
     ctx.save();
     ctx.shadowColor   = `rgba(0,0,0,${alpha})`;
     ctx.shadowBlur    = state.shadowBlur;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = state.shadowY;
-
-    // Use a solid black rect so the shadow is actually visible.
-    // The image drawn on top will cover this rect.
     ctx.fillStyle = 'rgba(0,0,0,1)';
     ctx.beginPath();
-    drawRoundRect(ctx, x + frameMargins.left, y + frameMargins.top, imgW, imgH, state.radius);
+    drawRoundRect(ctx, shadowX, shadowY, shadowW, shadowH, shadowR);
     ctx.fill();
     ctx.restore();
   }
@@ -582,9 +589,14 @@ function drawFullCanvas(canvas, scale = 1) {
   }
 
   // ── Image with rounded corners ──
+  // When a device frame is active, use frame-appropriate screen radius instead of user radius
+  const imageRadius = state.frame === 'none' ? state.radius
+    : state.frame === 'iphone' ? 8
+    : state.frame === 'macbook' ? 4
+    : 0; // browser frame has no image rounding
   ctx.save();
   ctx.beginPath();
-  drawRoundRect(ctx, x + frameMargins.left, y + frameMargins.top, imgW, imgH, state.radius);
+  drawRoundRect(ctx, x + frameMargins.left, y + frameMargins.top, imgW, imgH, imageRadius);
   ctx.closePath();
   ctx.clip();
   ctx.drawImage(state.image, x + frameMargins.left, y + frameMargins.top, imgW, imgH);
