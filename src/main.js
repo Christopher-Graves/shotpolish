@@ -591,7 +591,7 @@ function drawFullCanvas(canvas, scale = 1) {
   // ── Image with rounded corners ──
   // When a device frame is active, use frame-appropriate screen radius instead of user radius
   const imageRadius = state.frame === 'none' ? state.radius
-    : state.frame === 'iphone' ? 8
+    : state.frame === 'iphone' ? Math.max(Math.min(52, imgW * 0.14) - 14, 4) // match inner bezel radius
     : state.frame === 'macbook' ? 4
     : 0; // browser frame has no image rounding
   ctx.save();
