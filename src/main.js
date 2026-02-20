@@ -4,7 +4,7 @@
  */
 
 import { GRADIENTS, SOLID_COLORS, MESH_GRADIENTS } from './presets.js';
-import { drawFrameUnder, drawFrameOver } from './frames.js';
+import { drawFrameUnder, drawFrameOver, frameImagesReady } from './frames.js';
 import { exportPNG } from './export.js';
 import { isPro, initLicense } from './license.js';
 import { showProModal, renderAccountWidget } from './pro.js';
@@ -210,6 +210,9 @@ function init() {
   // Silent background license check
   initLicense();
 
+  // Preload frame images
+  frameImagesReady.catch(err => console.error('Frame images failed to load:', err));
+
   // Handle post-checkout success redirect
   if (new URLSearchParams(window.location.search).get('activated') === '1') {
     window.history.replaceState({}, '', window.location.pathname);
@@ -331,15 +334,8 @@ function bindEvents() {
 
   // ── Background Tabs ──
   document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
+    btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
-
-      // Gate: Mesh tab requires Pro
-      if (tab === 'mesh' && !isPro()) {
-        const activated = await showProModal('Mesh Backgrounds');
-        if (!activated) return;
-        renderAccountWidget();
-      }
 
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -407,13 +403,6 @@ function bindEvents() {
     btn.addEventListener('click', async () => {
       const frame = btn.dataset.frame;
 
-      // Gate: device frames (browser, macbook, iphone) require Pro
-      if (frame !== 'none' && !isPro()) {
-        const activated = await showProModal('Device Frames');
-        if (!activated) return;
-        renderAccountWidget();
-      }
-
       frameBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       state.frame = frame;
@@ -438,15 +427,8 @@ function bindEvents() {
 
   // ── Export Scale ──
   scaleBtns.forEach(btn => {
-    btn.addEventListener('click', async () => {
+    btn.addEventListener('click', () => {
       const scale = parseInt(btn.dataset.scale);
-
-      // Gate: 2× and 3× require Pro
-      if (scale > 1 && !isPro()) {
-        const activated = await showProModal(`${scale}× Export Scale`);
-        if (!activated) return;
-        renderAccountWidget();
-      }
 
       scaleBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -533,12 +515,51 @@ function getCanvasDimensions() {
 }
 
 function getFrameMargins() {
+  const img = state.image;
+  if (!img) return { top: 0, right: 0, bottom: 0, left: 0 };
+  
   switch (state.frame) {
-    case 'browser':  return { top: 42, right: 0, bottom: 0, left: 0 };
-    case 'macbook':  return { top: 36, right: 24, bottom: 54, left: 24 };
-    case 'iphone':   return { top: 60, right: 18, bottom: 60, left: 18 };
-    default:         return { top: 0, right: 0, bottom: 0, left: 0 };
+    case 'browser':
+      return { top: 42, right: 0, bottom: 0, left: 0 };
+    case 'macbook':
+      return {
+        top: Math.round(img.height * 0.0558),
+        bottom: Math.round(img.height * 0.1329),
+        left: Math.round(img.width * 0.1109),
+        right: Math.round(img.width * 0.1109),
+      };
+    case 'iphone':
+      return {
+        top: Math.round(img.height * 0.0718),
+        bottom: Math.round(img.height * 0.0162),
+        left: Math.round(img.width * 0.0394),
+        right: Math.round(img.width * 0.0394),
+      };
+    default:
+      return { top: 0, right: 0, bottom: 0, left: 0 };
   }
+}
+
+function drawWatermark(ctx, w, h) {
+  ctx.save();
+  ctx.globalAlpha = 0.15;
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.rotate(-30 * Math.PI / 180);
+  
+  const text = 'SHOTPOLISH PRO';
+  const spacingX = 200;
+  const spacingY = 100;
+  
+  // Cover the rotated area (need extra range due to rotation)
+  for (let y = -h; y < h * 2; y += spacingY) {
+    for (let x = -w; x < w * 2; x += spacingX) {
+      ctx.fillText(text, x, y);
+    }
+  }
+  ctx.restore();
 }
 
 function drawFullCanvas(canvas, scale = 1) {
@@ -606,6 +627,11 @@ function drawFullCanvas(canvas, scale = 1) {
   // Browser title bar, camera notch, dynamic island, home bar, screen glow, etc.
   if (state.frame !== 'none') {
     drawFrameOver(ctx, state.frame, x, y, contentW, contentH, imgW, imgH, frameMargins, state, scale);
+  }
+
+  // ── Watermark for non-Pro users (tiled across entire canvas) ──
+  if (!isPro()) {
+    drawWatermark(ctx, canvasW, canvasH);
   }
 }
 
