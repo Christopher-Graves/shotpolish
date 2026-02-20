@@ -9,7 +9,7 @@
 
 // ─── Frame PNG Image Loading ──────────────────────────────────────────────────
 
-const FRAME_SPECS = {
+export const FRAME_SPECS = {
   macbook: {
     path: '/frames/MacBook Pro 16.png',
     totalW: 4340,

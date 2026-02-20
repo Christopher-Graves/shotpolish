@@ -4,7 +4,7 @@
  */
 
 import { GRADIENTS, SOLID_COLORS, MESH_GRADIENTS } from './presets.js';
-import { drawFrameUnder, drawFrameOver, frameImagesReady } from './frames.js';
+import { drawFrameUnder, drawFrameOver, frameImagesReady, FRAME_SPECS } from './frames.js';
 import { exportPNG } from './export.js';
 import { isPro, initLicense } from './license.js';
 import { showProModal, renderAccountWidget } from './pro.js';
@@ -521,20 +521,28 @@ function getFrameMargins() {
   switch (state.frame) {
     case 'browser':
       return { top: 42, right: 0, bottom: 0, left: 0 };
-    case 'macbook':
+    case 'macbook': {
+      const spec = FRAME_SPECS.macbook;
+      // Scale the frame so its screen width matches the image width
+      const scaleFactor = img.width / spec.screenW;
       return {
-        top: Math.round(img.height * 0.0558),
-        bottom: Math.round(img.height * 0.1329),
-        left: Math.round(img.width * 0.1109),
-        right: Math.round(img.width * 0.1109),
+        top: Math.round(spec.screenY * scaleFactor),
+        left: Math.round(spec.screenX * scaleFactor),
+        right: Math.round((spec.totalW - spec.screenX - spec.screenW) * scaleFactor),
+        bottom: Math.round((spec.totalH - spec.screenY - spec.screenH) * scaleFactor),
       };
-    case 'iphone':
+    }
+    case 'iphone': {
+      const spec = FRAME_SPECS.iphone;
+      // Scale the frame so its screen width matches the image width
+      const scaleFactor = img.width / spec.screenW;
       return {
-        top: Math.round(img.height * 0.0718),
-        bottom: Math.round(img.height * 0.0162),
-        left: Math.round(img.width * 0.0394),
-        right: Math.round(img.width * 0.0394),
+        top: Math.round(spec.screenY * scaleFactor),
+        left: Math.round(spec.screenX * scaleFactor),
+        right: Math.round((spec.totalW - spec.screenX - spec.screenW) * scaleFactor),
+        bottom: Math.round((spec.totalH - spec.screenY - spec.screenH) * scaleFactor),
       };
+    }
     default:
       return { top: 0, right: 0, bottom: 0, left: 0 };
   }
