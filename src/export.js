@@ -8,11 +8,11 @@ export function exportPNG(state, drawFn) {
   const scale = state.exportScale ?? 2;
   const exportCanvas = document.createElement('canvas');
 
-  // Draw main content
+  // Draw main content (includes tiled watermark via drawFullCanvas if using Pro features)
   drawFn(exportCanvas, scale);
 
-  // Add watermark only for free users
-  if (!isPro()) {
+  // Add corner watermark for free users using Pro export scales
+  if (!isPro() && scale > 1) {
     addWatermark(exportCanvas, scale);
   }
 

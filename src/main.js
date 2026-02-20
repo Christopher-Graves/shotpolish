@@ -629,8 +629,13 @@ function drawFullCanvas(canvas, scale = 1) {
     drawFrameOver(ctx, state.frame, x, y, contentW, contentH, imgW, imgH, frameMargins, state, scale);
   }
 
-  // ── Watermark for non-Pro users (tiled across entire canvas) ──
-  if (!isPro()) {
+  // ── Watermark when free users use Pro features ──
+  const usingProFeature = !isPro() && (
+    state.frame === 'macbook' ||
+    state.frame === 'iphone' ||
+    state.bgType === 'mesh'
+  );
+  if (usingProFeature) {
     drawWatermark(ctx, canvasW, canvasH);
   }
 }
