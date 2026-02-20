@@ -486,66 +486,67 @@ function getCanvasDimensions() {
   const img = state.image;
   const pad = state.padding;
 
-  // Base dimensions include the frame wrapper (if any)
-  let imgW = img.width;
-  let imgH = img.height;
+  let imgW, imgH, frameMargins;
 
-  // Account for frame size
-  const frameMargins = getFrameMargins();
+  if (state.frame === 'macbook' || state.frame === 'iphone') {
+    const spec = FRAME_SPECS[state.frame];
+    
+    // Scale IMAGE to fit inside the device screen (contain mode)
+    const fitScale = Math.min(spec.screenW / img.width, spec.screenH / img.height);
+    imgW = Math.round(img.width * fitScale);
+    imgH = Math.round(img.height * fitScale);
+    
+    // The frame is drawn at 1:1 scale (frame PNG pixel = canvas pixel)
+    // contentW/H = the full frame size at this scale
+    // imgW/imgH is smaller or equal to screen size
+    const contentW = spec.totalW;
+    const contentH = spec.totalH;
+    
+    // frameMargins represent bezel + any letterbox space
+    // These aren't used for positioning anymore — just for canvas sizing
+    frameMargins = {
+      top: spec.screenY,
+      left: spec.screenX,
+      right: spec.totalW - spec.screenX - spec.screenW,
+      bottom: spec.totalH - spec.screenY - spec.screenH,
+    };
+
+    let canvasW = contentW + pad * 2;
+    let canvasH = contentH + pad * 2;
+
+    if (state.ratio !== 'auto') {
+      const [rw, rh] = state.ratio.split(':').map(Number);
+      const targetRatio = rw / rh;
+      const currentRatio = canvasW / canvasH;
+      if (currentRatio > targetRatio) canvasH = Math.round(canvasW / targetRatio);
+      else canvasW = Math.round(canvasH * targetRatio);
+    }
+
+    return { canvasW, canvasH, imgW, imgH, contentW, contentH, frameMargins };
+  }
+
+  // Non-device frames (none, browser)
+  imgW = img.width;
+  imgH = img.height;
+  frameMargins = state.frame === 'browser' 
+    ? { top: 42, right: 0, bottom: 0, left: 0 }
+    : { top: 0, right: 0, bottom: 0, left: 0 };
+
   const contentW = imgW + frameMargins.left + frameMargins.right;
   const contentH = imgH + frameMargins.top + frameMargins.bottom;
 
   let canvasW = contentW + pad * 2;
   let canvasH = contentH + pad * 2;
 
-  // Apply aspect ratio if set
   if (state.ratio !== 'auto') {
     const [rw, rh] = state.ratio.split(':').map(Number);
     const targetRatio = rw / rh;
     const currentRatio = canvasW / canvasH;
-
-    if (currentRatio > targetRatio) {
-      canvasH = Math.round(canvasW / targetRatio);
-    } else {
-      canvasW = Math.round(canvasH * targetRatio);
-    }
+    if (currentRatio > targetRatio) canvasH = Math.round(canvasW / targetRatio);
+    else canvasW = Math.round(canvasH * targetRatio);
   }
 
   return { canvasW, canvasH, imgW, imgH, contentW, contentH, frameMargins };
-}
-
-function getFrameMargins() {
-  const img = state.image;
-  if (!img) return { top: 0, right: 0, bottom: 0, left: 0 };
-  
-  switch (state.frame) {
-    case 'browser':
-      return { top: 42, right: 0, bottom: 0, left: 0 };
-    case 'macbook': {
-      const spec = FRAME_SPECS.macbook;
-      // Scale the frame so its screen width matches the image width
-      const scaleFactor = img.width / spec.screenW;
-      return {
-        top: Math.round(spec.screenY * scaleFactor),
-        left: Math.round(spec.screenX * scaleFactor),
-        right: Math.round((spec.totalW - spec.screenX - spec.screenW) * scaleFactor),
-        bottom: Math.round((spec.totalH - spec.screenY - spec.screenH) * scaleFactor),
-      };
-    }
-    case 'iphone': {
-      const spec = FRAME_SPECS.iphone;
-      // Scale the frame so its screen width matches the image width
-      const scaleFactor = img.width / spec.screenW;
-      return {
-        top: Math.round(spec.screenY * scaleFactor),
-        left: Math.round(spec.screenX * scaleFactor),
-        right: Math.round((spec.totalW - spec.screenX - spec.screenW) * scaleFactor),
-        bottom: Math.round((spec.totalH - spec.screenY - spec.screenH) * scaleFactor),
-      };
-    }
-    default:
-      return { top: 0, right: 0, bottom: 0, left: 0 };
-  }
 }
 
 function drawWatermark(ctx, w, h) {
@@ -617,19 +618,43 @@ function drawFullCanvas(canvas, scale = 1) {
     drawFrameUnder(ctx, state.frame, x, y, contentW, contentH, imgW, imgH, frameMargins, state, scale);
   }
 
-  // ── Image with rounded corners ──
-  // When a device frame is active, use frame-appropriate screen radius instead of user radius
-  const imageRadius = state.frame === 'none' ? state.radius
-    : state.frame === 'iphone' ? Math.max(Math.min(52, imgW * 0.14) - 14, 4) // match inner bezel radius
-    : state.frame === 'macbook' ? 4
-    : 0; // browser frame has no image rounding
-  ctx.save();
-  ctx.beginPath();
-  drawRoundRect(ctx, x + frameMargins.left, y + frameMargins.top, imgW, imgH, imageRadius);
-  ctx.closePath();
-  ctx.clip();
-  ctx.drawImage(state.image, x + frameMargins.left, y + frameMargins.top, imgW, imgH);
-  ctx.restore();
+  // ── Image ──
+  if (state.frame === 'macbook' || state.frame === 'iphone') {
+    // Device frame: draw image centered in the screen hole
+    const spec = FRAME_SPECS[state.frame];
+    const screenX = x + spec.screenX;
+    const screenY = y + spec.screenY;
+    const screenW = spec.screenW;
+    const screenH = spec.screenH;
+    
+    // Fill screen black (for letterboxing)
+    ctx.save();
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(screenX, screenY, screenW, screenH);
+    ctx.restore();
+    
+    // Center image within screen
+    const drawX = screenX + Math.round((screenW - imgW) / 2);
+    const drawY = screenY + Math.round((screenH - imgH) / 2);
+    
+    // Clip to screen area
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(screenX, screenY, screenW, screenH);
+    ctx.clip();
+    ctx.drawImage(state.image, drawX, drawY, imgW, imgH);
+    ctx.restore();
+  } else {
+    // No device frame or browser: draw with rounded corners
+    const imageRadius = state.frame === 'none' ? state.radius : 0;
+    ctx.save();
+    ctx.beginPath();
+    drawRoundRect(ctx, x + frameMargins.left, y + frameMargins.top, imgW, imgH, imageRadius);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(state.image, x + frameMargins.left, y + frameMargins.top, imgW, imgH);
+    ctx.restore();
+  }
 
   // ── Device Frame overlays (over image) ──
   // Browser title bar, camera notch, dynamic island, home bar, screen glow, etc.

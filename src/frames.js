@@ -137,21 +137,12 @@ function drawMacbookPNGFrame(ctx, x, y, imgW, imgH, margins) {
   const spec = FRAME_SPECS.macbook;
   const img = frameImages.macbook;
   
-  if (!img.complete) return; // Image not loaded yet
+  if (!img.complete) return;
   
-  // Calculate scale factor: frame PNG needs to scale so its screen hole matches the screenshot size
-  const scaleFactor = imgW / spec.screenW;
-  
-  // Calculate frame draw position so the screen hole aligns with the screenshot position
-  // Screenshot is at (x + margins.left, y + margins.top)
-  // Screen hole in PNG starts at (spec.screenX, spec.screenY)
-  const frameDrawX = (x + margins.left) - (spec.screenX * scaleFactor);
-  const frameDrawY = (y + margins.top) - (spec.screenY * scaleFactor);
-  const frameDrawW = spec.totalW * scaleFactor;
-  const frameDrawH = spec.totalH * scaleFactor;
-  
+  // Draw frame PNG at 1:1 scale, positioned at (x, y) = content area top-left
+  // contentW/H = spec.totalW/totalH (set in getCanvasDimensions)
   ctx.save();
-  ctx.drawImage(img, frameDrawX, frameDrawY, frameDrawW, frameDrawH);
+  ctx.drawImage(img, x, y, spec.totalW, spec.totalH);
   ctx.restore();
 }
 
@@ -164,21 +155,10 @@ function drawIphonePNGFrame(ctx, x, y, imgW, imgH, margins) {
   const spec = FRAME_SPECS.iphone;
   const img = frameImages.iphone;
   
-  if (!img.complete) return; // Image not loaded yet
-  
-  // Calculate scale factor: frame PNG needs to scale so its screen hole matches the screenshot size
-  const scaleFactor = imgW / spec.screenW;
-  
-  // Calculate frame draw position so the screen hole aligns with the screenshot position
-  // Screenshot is at (x + margins.left, y + margins.top)
-  // Screen hole in PNG starts at (spec.screenX, spec.screenY)
-  const frameDrawX = (x + margins.left) - (spec.screenX * scaleFactor);
-  const frameDrawY = (y + margins.top) - (spec.screenY * scaleFactor);
-  const frameDrawW = spec.totalW * scaleFactor;
-  const frameDrawH = spec.totalH * scaleFactor;
+  if (!img.complete) return;
   
   ctx.save();
-  ctx.drawImage(img, frameDrawX, frameDrawY, frameDrawW, frameDrawH);
+  ctx.drawImage(img, x, y, spec.totalW, spec.totalH);
   ctx.restore();
 }
 
